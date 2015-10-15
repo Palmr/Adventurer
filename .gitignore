@@ -1,4 +1,9 @@
+# Intellij
+.idea/
+*.iml
+*.iws
+
 target
-.idea
+
 graph-db/*
 resources/tbontb-regular.pdf
