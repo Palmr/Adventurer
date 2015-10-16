@@ -25,36 +25,55 @@ public class PdfParseTest {
   public static void main(String[] args) throws IOException {
     PdfReader reader = new PdfReader("C:\\Users\\npalmer\\git-projects\\Adventurer\\resources\\tbontb-regular.pdf");
     try {
-      PdfReaderContentParser parser = new PdfReaderContentParser(reader);
       int page = CHOICE_INFO_PDF_PAGE;
-      // Attempt to group text blocks by font to help parsing sections?
-      TextExtractionStrategy strategy = parser.processContent(page, new CustomTextExtractionStrategy());
-      System.out.println(strategy.getResultantText());
+
+      tryFontGrouping(reader, page);
 
       // Try looking for link regions and the text that's below the links?
-      PdfDictionary pageDict = reader.getPageN(page);
-      PdfArray lAnnotArray = pageDict.getAsArray(PdfName.ANNOTS);
-      if (lAnnotArray != null) {
-        for (int i = 0; i < lAnnotArray.size(); i++) {
-          System.out.println("Is link: " + (PdfName.LINK == lAnnotArray.getAsDict(i).get(PdfName.SUBTYPE)));
-          System.out.println("Rect: " + lAnnotArray.getAsDict(i).get(PdfName.RECT));
-
-          PdfArray lRectArray = (PdfArray)lAnnotArray.getAsDict(i).get(PdfName.RECT);
-
-          RegionTextRenderFilter lFilter = new RegionTextRenderFilter(PdfReader.getNormalizedRectangle(lRectArray));
-          TextExtractionStrategy lRenderListener = new FilteredTextRenderListener(new LocationTextExtractionStrategy(), lFilter);
-          TextExtractionStrategy lStrategy = parser.processContent(page, lRenderListener);
-
-          System.out.println("Region matched: " + lStrategy.getResultantText());
-        }
-      }
+      tryDictionaryLookup(reader, page);
     }
     finally {
       reader.close();
     }
   }
 
-  private static class CustomTextExtractionStrategy implements TextExtractionStrategy {
+  /**
+   * Try looking for link regions and the text that's below the links
+   */
+  private static void tryDictionaryLookup(PdfReader pReader, int pPage) throws IOException {
+    PdfReaderContentParser parser = new PdfReaderContentParser(pReader);
+    PdfDictionary pageDict = pReader.getPageN(pPage);
+    PdfArray lAnnotArray = pageDict.getAsArray(PdfName.ANNOTS);
+    if (lAnnotArray != null) {
+      for (int i = 0; i < lAnnotArray.size(); i++) {
+        if (PdfName.LINK == lAnnotArray.getAsDict(i).get(PdfName.SUBTYPE)) {
+          PdfArray lRectArray = (PdfArray) lAnnotArray.getAsDict(i).get(PdfName.RECT);
+
+          RegionTextRenderFilter lFilter = new RegionTextRenderFilter(PdfReader.getNormalizedRectangle(lRectArray));
+          TextExtractionStrategy lRenderListener = new FilteredTextRenderListener(new LocationTextExtractionStrategy(), lFilter);
+          TextExtractionStrategy lStrategy = parser.processContent(pPage, lRenderListener);
+
+          System.out.println("Annot/Link/Region matched: " + lStrategy.getResultantText());
+        }
+      }
+    }
+  }
+
+  /**
+   * Attempt to group the blocks of text by font type
+   */
+  private static void tryFontGrouping(PdfReader pReader, int page) {
+    try {
+      PdfReaderContentParser parser = new PdfReaderContentParser(pReader);
+      TextExtractionStrategy strategy = parser.processContent(page, new FontGroupingTextExtractionStrategy());
+      System.out.println(strategy.getResultantText());
+    }
+    catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  private static class FontGroupingTextExtractionStrategy implements TextExtractionStrategy {
     private String mLastTextFontName = null;
     private List<StringBuilder> mTextValues = new ArrayList<>();
 
