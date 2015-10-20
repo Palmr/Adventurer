@@ -6,4 +6,6 @@
 target
 
 graph-db/*
-resources/tbontb-regular.pdf
+resources/*
+
+itext-rups/*
