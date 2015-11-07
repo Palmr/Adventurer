@@ -13,10 +13,6 @@ import com.itextpdf.text.pdf.PdfWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.Properties;
 
 /**
  * There was an issue with iText 5.5.7 and below where the page label table parsing function PdfPageLabels.getPageLabels()
@@ -66,11 +62,16 @@ public class CreatePageLabelTestPDF {
    */
   private static void pageLabelReadTest(String lPageLabelTestPDFPath) throws IOException {
     System.out.println("Page label output using iText library: " + new Version().getVersion());
-
     PdfReader reader = new PdfReader(lPageLabelTestPDFPath);
-    String[] pageLabels = PdfPageLabels.getPageLabels(reader);
+    String[] iTextPageLabels = PdfPageLabels.getPageLabels(reader);
     for (int pdfPageNumber = 1; pdfPageNumber <= reader.getNumberOfPages(); pdfPageNumber++) {
-      System.out.println(pdfPageNumber + " - " + pageLabels[pdfPageNumber-1]);
+      System.out.println(pdfPageNumber + " - " + iTextPageLabels[pdfPageNumber-1]);
+    }
+
+    System.out.println("Page label output using fixed function, accepted by iText but not in official release yet");
+    String[] fixedPageLabels = FixedPdfPageLabels.getPageLabels(reader);
+    for (int pdfPageNumber = 1; pdfPageNumber <= reader.getNumberOfPages(); pdfPageNumber++) {
+      System.out.println(pdfPageNumber + " - " + fixedPageLabels[pdfPageNumber-1]);
     }
   }
 }
