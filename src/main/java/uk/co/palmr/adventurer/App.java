@@ -24,11 +24,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class App {
+  /**
+   * Pages can either continue onto the next page or be linked to another page via a choice
+   */
   private enum RelationshipTypes implements RelationshipType {
     Continues,
     Choice
   }
 
+  /**
+   * I categorised the main page types found in To Be Or Not To Be
+   */
   private enum PageTypes implements Label {
     Page,
     ImagePage,
@@ -37,13 +43,15 @@ public class App {
     Ignore
   }
 
+  // Property names used on nodes to help navigate pages
   private static final String PDF_PAGE_NUMBER = "pdf_page_number";
   private static final String BOOK_PAGE_LABEL = "book_page_label";
 
   public static void main(String[] args) throws IOException {
-    PdfReader reader = new PdfReader(App.class.getClassLoader().getResource("").getPath() + "\\..\\..\\resources\\tbontb-regular.pdf");
+    String pdfFilePath = System.getProperty("user.dir") + File.separator + "resources" + File.separator + "tbontb-regular.pdf";
+    String graphDbPath = System.getProperty("user.dir") + File.separator + "graph-db";
 
-    GraphDatabaseService graphDb = new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(new File(App.class.getClassLoader().getResource("").getPath() + "\\..\\..\\graph-db")).newGraphDatabase();
+    GraphDatabaseService graphDb = new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(new File(graphDbPath)).newGraphDatabase();
     registerShutdownHook(graphDb);
 
     System.out.println("Attempting to clear database from last run");
@@ -55,6 +63,8 @@ public class App {
       ignored.success();
     }
 
+
+    PdfReader reader = new PdfReader(pdfFilePath);
 
     System.out.println("Attempting to populate database");
     try (Transaction tx = graphDb.beginTx()) {

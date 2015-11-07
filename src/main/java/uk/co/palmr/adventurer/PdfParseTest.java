@@ -7,8 +7,12 @@ import com.itextpdf.text.pdf.parser.PdfReaderContentParser;
 import com.itextpdf.text.pdf.parser.RegionTextRenderFilter;
 import com.itextpdf.text.pdf.parser.TextExtractionStrategy;
 
+import java.io.File;
 import java.io.IOException;
 
+/**
+ * This is a test class where I'm experimenting with various PDF parsing techniques for finding links and text
+ */
 public class PdfParseTest {
   private static final int CHOICE_INFO_PDF_PAGE = 20;
   private static final int CHOICE_PDF_PAGE = 21;
@@ -17,7 +21,7 @@ public class PdfParseTest {
   private static final int SUB_BOOK_TITLE = 433;
 
   public static void main(String[] args) throws IOException {
-    PdfReader reader = new PdfReader(App.class.getClassLoader().getResource("").getPath() + "\\..\\..\\resources\\tbontb-regular.pdf");
+    PdfReader reader = new PdfReader(System.getProperty("user.dir") + File.separator + "resources" + File.separator + "tbontb-regular.pdf");
     try {
       int page = SUB_BOOK_TITLE;
 
