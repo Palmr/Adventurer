@@ -1,20 +1,27 @@
-package uk.co.palmr;
+package uk.co.palmr.adventurer;
 
-import com.itextpdf.text.factories.RomanAlphabetFactory;
-import com.itextpdf.text.factories.RomanNumberFactory;
-import com.itextpdf.text.pdf.*;
-import com.itextpdf.text.pdf.parser.*;
-import org.neo4j.graphdb.*;
+import com.itextpdf.text.pdf.PdfArray;
+import com.itextpdf.text.pdf.PdfDictionary;
+import com.itextpdf.text.pdf.PdfIndirectReference;
+import com.itextpdf.text.pdf.PdfName;
+import com.itextpdf.text.pdf.PdfObject;
+import com.itextpdf.text.pdf.PdfReader;
+import com.itextpdf.text.pdf.parser.PdfReaderContentParser;
+import org.neo4j.graphdb.Direction;
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Label;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.graphdb.Result;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
-import org.neo4j.register.Register;
+import uk.co.palmr.adventurer.itextbug.FixedPdfPageLabels;
 
+import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class App {
   private enum RelationshipTypes implements RelationshipType {
@@ -36,7 +43,7 @@ public class App {
   public static void main(String[] args) throws IOException {
     PdfReader reader = new PdfReader(App.class.getClassLoader().getResource("").getPath() + "\\..\\..\\resources\\tbontb-regular.pdf");
 
-    GraphDatabaseService graphDb = new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(App.class.getClassLoader().getResource("").getPath() + "\\..\\..\\graph-db").newGraphDatabase();
+    GraphDatabaseService graphDb = new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(new File(App.class.getClassLoader().getResource("").getPath() + "\\..\\..\\graph-db")).newGraphDatabase();
     registerShutdownHook(graphDb);
 
     System.out.println("Attempting to clear database from last run");
@@ -52,7 +59,7 @@ public class App {
     System.out.println("Attempting to populate database");
     try (Transaction tx = graphDb.beginTx()) {
       System.out.println("Creating page nodes");
-      String[] bookPageLabels = getPageLabels(reader);
+      String[] bookPageLabels = FixedPdfPageLabels.getPageLabels(reader);
       Map<PdfObject, String> pdfPageToBookPageLabel = new HashMap<>(reader.getNumberOfPages());
       for (int pdfPageNumber = 1; pdfPageNumber <= reader.getNumberOfPages(); pdfPageNumber++) {
         Node pageNode = graphDb.createNode(PageTypes.Page);
@@ -154,76 +161,6 @@ public class App {
     graphDb.shutdown();
 
     // Query e.g. MATCH r=(s:SubBook {book_page_label: "Gi"})-[*..10]->(e:SubBook :EndPage) RETURN r
-  }
-
-  /**
-   * Retrieves the page labels from a PDF as an array of String objects.
-   * @param reader a PdfReader object that has the page labels you want to retrieve
-   * @return	a String array or <code>null</code> if no page labels are present
-   */
-  public static String[] getPageLabels(PdfReader reader) {
-
-    int n = reader.getNumberOfPages();
-
-    PdfDictionary dict = reader.getCatalog();
-    PdfDictionary labels = (PdfDictionary)PdfReader.getPdfObjectRelease(dict.get(PdfName.PAGELABELS));
-    if (labels == null)
-      return null;
-
-    String[] labelstrings = new String[n];
-
-    HashMap<Integer, PdfObject> numberTree = PdfNumberTree.readTree(labels);
-
-    int pagecount = 1;
-    Integer current;
-    String prefix = "";
-    char type = 'D';
-    for (int i = 0; i < n; i++) {
-      current = Integer.valueOf(i);
-      if (numberTree.containsKey(current)) {
-        PdfDictionary d = (PdfDictionary)PdfReader.getPdfObjectRelease(numberTree.get(current));
-        if (d.contains(PdfName.ST)) {
-          pagecount = ((PdfNumber)d.get(PdfName.ST)).intValue();
-        }
-        else {
-          pagecount = 1;
-        }
-        if (d.contains(PdfName.P)) {
-          prefix = ((PdfString)d.get(PdfName.P)).toUnicodeString();
-        }
-        else {
-          prefix = ""; // NP - See page 596 of pdf ref, prefix is for that range only
-        }
-        if (d.contains(PdfName.S)) {
-          type = ((PdfName)d.get(PdfName.S)).toString().charAt(1);
-        }
-        else {
-          type = 'e';
-        }
-      }
-      switch(type) {
-        default:
-          labelstrings[i] = prefix + pagecount;
-          break;
-        case 'R':
-          labelstrings[i] = prefix + RomanNumberFactory.getUpperCaseString(pagecount);
-          break;
-        case 'r':
-          labelstrings[i] = prefix + RomanNumberFactory.getLowerCaseString(pagecount);
-          break;
-        case 'A':
-          labelstrings[i] = prefix + RomanAlphabetFactory.getUpperCaseString(pagecount);
-          break;
-        case 'a':
-          labelstrings[i] = prefix + RomanAlphabetFactory.getLowerCaseString(pagecount);
-          break;
-        case 'e':
-          labelstrings[i] = prefix;
-          break;
-      }
-      pagecount++;
-    }
-    return labelstrings;
   }
 
   private static void registerShutdownHook(final GraphDatabaseService graphDb) {

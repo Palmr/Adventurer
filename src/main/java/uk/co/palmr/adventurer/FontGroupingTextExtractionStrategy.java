@@ -1,4 +1,4 @@
-package uk.co.palmr;
+package uk.co.palmr.adventurer;
 
 import com.itextpdf.text.pdf.parser.ImageRenderInfo;
 import com.itextpdf.text.pdf.parser.TextExtractionStrategy;

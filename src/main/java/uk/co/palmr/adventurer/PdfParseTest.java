@@ -1,17 +1,13 @@
-package uk.co.palmr;
+package uk.co.palmr.adventurer;
 
 import com.itextpdf.text.pdf.*;
 import com.itextpdf.text.pdf.parser.FilteredTextRenderListener;
-import com.itextpdf.text.pdf.parser.ImageRenderInfo;
 import com.itextpdf.text.pdf.parser.LocationTextExtractionStrategy;
 import com.itextpdf.text.pdf.parser.PdfReaderContentParser;
 import com.itextpdf.text.pdf.parser.RegionTextRenderFilter;
 import com.itextpdf.text.pdf.parser.TextExtractionStrategy;
-import com.itextpdf.text.pdf.parser.TextRenderInfo;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class PdfParseTest {
   private static final int CHOICE_INFO_PDF_PAGE = 20;
