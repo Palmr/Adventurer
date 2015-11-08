@@ -29,7 +29,7 @@ You can also view the whole book in graph form, though this can take some time t
 
 ![The entire book graph](./images/entire-book.gif)
 
-Cypher = `MATCH n RETURN n`
+Cypher = `MATCH (n) RETURN n`
 
 ## Requirements ##
 Adventurer is written in Java (1.8+) with Maven for dependency management. You will need [Neo4j Community Edition](http://neo4j.com/download/)

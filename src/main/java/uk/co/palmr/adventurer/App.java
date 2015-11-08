@@ -238,7 +238,7 @@ public class App {
 
       // Do some context scanning to find page types
       FontGroupingTextExtractionStrategy strategy = contentParser.processContent(pdfPageNumber, new FontGroupingTextExtractionStrategy(false));
-      if (strategy.getImageCount() > 0 && (strategy.getTextValues().size() == 0 || (strategy.getTextValues().size() == 1 && strategy.getTextValues().get(0).toString().equals(pageLabels[pdfPageNumber])))) {
+      if (strategy.getImageCount() > 0 && (strategy.getTextValues().size() == 0 || (strategy.getTextValues().size() == 1 && thisBookPageLabel.equals(strategy.getTextValues().get(0).toString())))) {
         // If the page is nothing but an image, label it as an image page (Typically an ending comic)
         thisPage.addLabel(PageTypes.ImagePage);
       }
