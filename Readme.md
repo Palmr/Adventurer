@@ -11,7 +11,7 @@ Adventurer results in a [Neo4j](http://neo4j.com/) database filled with informat
 Some might say this takes the fun out of a choose your own adventure book, and it kind of does. But some days you just want to end up being Hamlet riding Claudius like a skateboard after being fired out of a cannon from the rad pirate ship you took control of after fighting the pirate captain (check out page 197).
 
 ## Example ##
-Once the code has run and analysed the book you can start Neo4j in the graph-db directory and start querying the data with Cypher.
+Once the code has run and analysed the book you can start Neo4j in the graph-db directory and start querying the data with [Cypher](http://neo4j.com/developer/cypher/) (Neo4j’s graph query language).
 
 You can then query out the full graph of pages that make up the sub-book (The Murder of Gonzago):
 
