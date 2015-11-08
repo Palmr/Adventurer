@@ -1,11 +1,17 @@
 package uk.co.palmr.adventurer;
 
-import com.itextpdf.text.pdf.*;
+import com.itextpdf.text.pdf.PdfArray;
+import com.itextpdf.text.pdf.PdfDictionary;
+import com.itextpdf.text.pdf.PdfName;
+import com.itextpdf.text.pdf.PdfReader;
+import com.itextpdf.text.pdf.PdfString;
 import com.itextpdf.text.pdf.parser.FilteredTextRenderListener;
 import com.itextpdf.text.pdf.parser.LocationTextExtractionStrategy;
 import com.itextpdf.text.pdf.parser.PdfReaderContentParser;
 import com.itextpdf.text.pdf.parser.RegionTextRenderFilter;
 import com.itextpdf.text.pdf.parser.TextExtractionStrategy;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,6 +20,8 @@ import java.io.IOException;
  * This is a test class where I'm experimenting with various PDF parsing techniques for finding links and text
  */
 public class PdfParseTest {
+  private static final Logger LOGGER = LogManager.getLogger(PdfParseTest.class);
+
   private static final int CHOICE_INFO_PDF_PAGE = 20;
   private static final int CHOICE_PDF_PAGE = 21;
   private static final int COMIC_PDF_PAGE = 18;
@@ -25,10 +33,8 @@ public class PdfParseTest {
     try {
       int page = SUB_BOOK_TITLE;
 
-      System.out.println("Font grouping");
       tryFontGrouping(reader, page);
 
-      System.out.println("Link annotations");
       tryDictionaryLookup(reader, page);
     }
     finally {
@@ -40,6 +46,7 @@ public class PdfParseTest {
    * Try looking for link regions and the text that's below the links
    */
   private static void tryDictionaryLookup(PdfReader pReader, int pPage) throws IOException {
+    LOGGER.info("Trying Link Annotations");
     PdfReaderContentParser parser = new PdfReaderContentParser(pReader);
     PdfDictionary pageDict = pReader.getPageN(pPage);
     PdfArray lAnnotArray = pageDict.getAsArray(PdfName.ANNOTS);
@@ -57,7 +64,7 @@ public class PdfParseTest {
           TextExtractionStrategy lRenderListener = new FilteredTextRenderListener(new LocationTextExtractionStrategy(), lFilter);
           TextExtractionStrategy lStrategy = parser.processContent(pPage, lRenderListener);
 
-          System.out.println("Annot/Link/Region matched: " + lStrategy.getResultantText());
+          LOGGER.info("Annot/Link/Region matched: " + lStrategy.getResultantText());
         }
       }
     }
@@ -67,13 +74,14 @@ public class PdfParseTest {
    * Attempt to group the blocks of text by font type
    */
   private static void tryFontGrouping(PdfReader pReader, int page) {
+    LOGGER.info("Trying Font Grouping");
     try {
       PdfReaderContentParser parser = new PdfReaderContentParser(pReader);
       FontGroupingTextExtractionStrategy strategy = parser.processContent(page, new FontGroupingTextExtractionStrategy(false));
-      System.out.println(strategy.getResultantText());
+      LOGGER.info(strategy.getResultantText());
       for (StringBuilder textBlock : strategy.getTextValues()) {
         if (textBlock.toString().matches("THE END(!!)?")) {
-          System.out.println("END PAGE");
+          LOGGER.debug("END PAGE");
         }
       }
     }
