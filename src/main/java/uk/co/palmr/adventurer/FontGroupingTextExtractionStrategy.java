@@ -78,10 +78,7 @@ public class FontGroupingTextExtractionStrategy implements TextExtractionStrateg
   @Override
   public String getResultantText() {
     StringBuilder lPageContent = new StringBuilder();
-    for (StringBuilder lBlock : mTextValues) {
-      lPageContent.append(lBlock);
-      lPageContent.append("\r\n--\r\n");
-    }
+    mTextValues.forEach(lPageContent::append);
     return lPageContent.toString();
   }
 
