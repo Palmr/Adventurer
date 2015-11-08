@@ -36,6 +36,8 @@ Adventurer is written in Java (1.8+) with Maven for dependency management. You w
 
 You will need to supply your own copy of **To Be Or Not To Be** however. Everyone who backed the project on [Kickstarter](https://www.kickstarter.com/) should have relieved a copy. I'm not sure if you can buy a PDF copy today, if not I would highly suggest buying a legit paper copy before heading to Google looking for a less legit copy. This program can help you enjoy the book more, and the book is well worth the money!
 
+Put your copy of `tbontb-regular.pdf` in a folder called resources and you should be good to go.
+
 ## TODO ##
 - Improve page parsing for end/image pages
 - Attempt to work back from links to find the choice text to add to relationships
