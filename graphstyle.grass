@@ -5,7 +5,6 @@ node {
   border-width: 2px;
   text-color-internal: #FFFFFF;
   font-size: 10px;
-  caption: 'Page {page_number}';
 }
 
 relationship {
@@ -23,13 +22,6 @@ node.Page {
   border-color: #5CA8DB;
   text-color-internal: #FFFFFF;
   caption: '{book_page_label}';
-}
-
-node.Ending {
-  color: #6DCE9E;
-  border-color: #60B58B;
-  text-color-internal: #FFFFFF;
-  caption: '{page_number}';
 }
 
 node.EndPage {
@@ -55,13 +47,6 @@ node.SubBook {
   border-color: #EDBA39;
   text-color-internal: #604A0E;
   diameter: 50px;
-}
-
-node.SubBook.Ending {
-  color: #6DCE9E;
-  border-color: #60B58B;
-  text-color-internal: #FFFFFF;
-  caption: '{page_number}';
 }
 
 node.SubBook.EndPage {
