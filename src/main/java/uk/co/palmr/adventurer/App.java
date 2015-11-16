@@ -70,7 +70,7 @@ public class App {
       Map<PdfObject, String> pdfPageToPageLabel = createPageNodes(reader, pageLabels, graphDb);
 
       // Process each page, classifying it and updating the database
-      processPages(reader, pageLabels, pdfPageToPageLabel, graphDb);
+      processPages(reader, pdfPageToPageLabel, graphDb);
 
       tx.success();
     }
@@ -85,7 +85,8 @@ public class App {
 
   /**
    * Set up a GraphDatabaseService for Adventurer to fill with data
-   * @return
+   *
+   * @return Graph database handle
    */
   private static GraphDatabaseService getDatabase() {
     String graphDbPath = System.getProperty("user.dir") + File.separator + "graph-db";
@@ -105,7 +106,6 @@ public class App {
    * @param graphDb Database to clear
    */
   private static void registerShutdownHook(final GraphDatabaseService graphDb) {
-    //
     Runtime.getRuntime().addShutdownHook(new Thread() {
       @Override
       public void run() {
@@ -160,14 +160,15 @@ public class App {
   }
 
   /**
+   * Process each page in the PdfReader looking for features that can be noted in the database (e.g. image page, end
+   * page, relationships)
    *
    * @param reader PdfReader to get PDF information from
-   * @param pageLabels Array of page labels
    * @param pdfPageToPageLabel Map of PdfObjects representing pages to page labels
    * @param graphDb Database
    * @throws IOException
    */
-  private static void processPages(PdfReader reader, String[] pageLabels, Map<PdfObject, String> pdfPageToPageLabel, GraphDatabaseService graphDb) throws IOException {
+  private static void processPages(PdfReader reader, Map<PdfObject, String> pdfPageToPageLabel, GraphDatabaseService graphDb) throws IOException {
     LOGGER.info("Processing all pages");
 
     PdfReaderContentParser contentParser = new PdfReaderContentParser(reader);
@@ -200,20 +201,20 @@ public class App {
 
       // Check for inter-page-links
       PdfDictionary pageDict = reader.getPageN(pdfPageNumber);
-      PdfArray annotArray = pageDict.getAsArray(PdfName.ANNOTS);
+      PdfArray annotationArray = pageDict.getAsArray(PdfName.ANNOTS);
       boolean linksOut = false;
-      if (annotArray != null) {
-        for (int i = 0; i < annotArray.size(); i++) {
-          PdfDictionary annotDict = annotArray.getAsDict(i);
-          if (PdfName.LINK == annotDict.get(PdfName.SUBTYPE)) {
-            if (annotDict.contains(PdfName.A)) {
-              String lDestination = ((PdfDictionary) reader.getPdfObject(annotDict.getAsIndirectObject(PdfName.A))).getAsString(PdfName.D).toString();
+      if (annotationArray != null) {
+        for (int i = 0; i < annotationArray.size(); i++) {
+          PdfDictionary annotationDictionary = annotationArray.getAsDict(i);
+          if (PdfName.LINK == annotationDictionary.get(PdfName.SUBTYPE)) {
+            if (annotationDictionary.contains(PdfName.A)) {
+              String lDestination = ((PdfDictionary) PdfReader.getPdfObject(annotationDictionary.getAsIndirectObject(PdfName.A))).getAsString(PdfName.D).toString();
               if (linkDestinations.containsKey(lDestination)) {
                 PdfArray destinationInfoArray = (PdfArray) linkDestinations.get(lDestination);
                 PdfIndirectReference destinationReference = destinationInfoArray.getAsIndirectObject(0); // TODO, this could actually be an integer for the case of Remote Destinations
                 PdfObject targetPdfPage = PdfReader.getPdfObject(destinationReference);
 
-                // Create link if it hasn't already been made between these pages (Split-line links mean two annots with the same dest)
+                // Create link if it hasn't already been made between these pages (Split-line links mean two annotations with the same dest)
                 Node targetPage = graphDb.findNode(PageTypes.Page, BOOK_PAGE_LABEL, pdfPageToPageLabel.get(targetPdfPage));
                 boolean existingRelationship = false;
                 for (Relationship r : thisPage.getRelationships(Direction.BOTH, RelationshipTypes.Choice)) {
@@ -229,7 +230,7 @@ public class App {
               }
             }
             else {
-              LOGGER.warn("Adventurer only handles Anchor Links");
+              LOGGER.warn("Adventurer only handles Anchor Links currently");
             }
           }
         }
@@ -238,17 +239,21 @@ public class App {
 
       // Do some context scanning to find page types
       FontGroupingTextExtractionStrategy strategy = contentParser.processContent(pdfPageNumber, new FontGroupingTextExtractionStrategy(false));
-      if (strategy.getImageCount() > 0 && (strategy.getTextValues().size() == 0 || (strategy.getTextValues().size() == 1 && thisBookPageLabel.equals(strategy.getTextValues().get(0).toString())))) {
+      if (strategy.getImageCount() > 0
+          && (strategy.getTextValues().size() == 0
+              || (strategy.getTextValues().size() == 1
+                  && thisBookPageLabel.equals(strategy.getTextValues().get(0).toString())
+                  )
+              )
+          ) {
         // If the page is nothing but an image, label it as an image page (Typically an ending comic)
         thisPage.addLabel(PageTypes.ImagePage);
       }
       else {
         // If not an image page perhaps there's text to parse?
-        for (StringBuilder textBlock : strategy.getTextValues()) {
-          if (textBlock.toString().matches("THE END(!!)?")) {
-            thisPage.addLabel(PageTypes.EndPage);
-          }
-        }
+        strategy.getTextValues().stream()
+          .filter(textBlock -> textBlock.toString().matches("THE END(!!)?"))
+          .forEach(textBlock -> thisPage.addLabel(PageTypes.EndPage));
 
         String[] words = strategy.getResultantText().split("\\s+");
         thisPage.setProperty(WORD_COUNT, words.length);
