@@ -41,6 +41,6 @@ Put your copy of `tbontb-regular.pdf` in a folder called resources and you shoul
 ## TODO ##
 - Improve page parsing for end/image pages
 - Attempt to work back from links to find the choice text to add to relationships
-- Weight relationships with wordcount of the page they're going (could then write queries to get the long route or quick routes)
-- Consolidate page parse loops
+- Write queries to get the long route or quick routes based on word-count weighted relationships
+- Consolidate page parse loops?
 - Research indexing in Neo4J to improve performance
