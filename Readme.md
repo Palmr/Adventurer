@@ -4,7 +4,7 @@ This is a program written to analyse choose your own adventure books.
 More specifically [To Be Or Not To Be](https://www.kickstarter.com/projects/breadpig/to-be-or-not-to-be-that-is-the-adventure/), by [Ryan North](https://twitter.com/ryanqnorth).
 I claim no ownership of his most excellent book and **I won't be including the PDF version in this repository**. You can however buy his book in paper form here: [http://breadpig.com/products/to-be-or-not-to-be](http://breadpig.com/products/to-be-or-not-to-be)
 
-The original Kickstarter offered a poster visualising a graph of all the routes through the book, [which you can still buy](http://breadpig.com/products/to-be-or-not-to-be), but I wanted more than a paper-based graph.
+The original Kickstarter offered a poster visualising a graph of all the routes through the book, [which you can still buy](http://breadpig.com/products/to-be-or-not-to-be-poster-preorder), but I wanted more than a paper-based graph.
 
 Adventurer results in a [Neo4j](http://neo4j.com/) database filled with information parsed out of the PDF. With that you can query all the routes you could take to get from one page to another, routes to end pages, and more!
 
