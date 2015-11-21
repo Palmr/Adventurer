@@ -24,6 +24,13 @@ node.Page {
   caption: '{book_page_label}';
 }
 
+node.SubBook {
+  color: #FFD86E;
+  border-color: #EDBA39;
+  text-color-internal: #604A0E;
+  diameter: 50px;
+}
+
 node.EndPage {
   color: #FF756E;
   border-color: #E06760;
@@ -42,28 +49,4 @@ node.ImagePage {
   text-color-internal: #FFFFFF;
 }
 
-node.SubBook {
-  color: #FFD86E;
-  border-color: #EDBA39;
-  text-color-internal: #604A0E;
-  diameter: 50px;
-}
-
-node.SubBook.EndPage {
-  color: #FF756E;
-  border-color: #E06760;
-  text-color-internal: #FFFFFF;
-}
-
-node.SubBook.Ignore {
-  color: #A5ABB6;
-  border-color: #9AA1AC;
-  text-color-internal: #FFFFFF;
-}
-
-node.SubBook.ImagePage {
-  color: #6DCE9E;
-  border-color: #60B58B;
-  text-color-internal: #FFFFFF;
-}
 
